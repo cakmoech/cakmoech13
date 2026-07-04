@@ -1,0 +1,595 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Shield, 
+  Swords, 
+  Castle, 
+  ScrollText, 
+  Trophy, 
+  User, 
+  Play, 
+  Check, 
+  X, 
+  LogOut,
+  Star,
+  Coins,
+  Volume2,
+  VolumeX,
+  Camera,
+  AlertTriangle
+} from 'lucide-react';
+
+// --- DATA SOAL ---
+const quizData = {
+  1: {
+    title: "Beginner",
+    description: "Pelatihan Dasar: Memahami terjemahan dan makna dasar Q.S. al-Maidah/5: 48 dan Q.S. at-Taubah/9: 105.",
+    pointPerQuestion: 3,
+    questions: [
+      { q: "Q.S. Al-Maidah: 48 membahas tentang perintah untuk...", options: ["A. Puasa Ramadhan", "B. Ibadah Haji", "C. Fastabiqul Khairat", "D. Zakat Fitrah", "E. Hukum Perang"], answer: 2 },
+      { q: "Arti lafaz 'Fastabiqul Khairat' adalah...", options: ["A. Berlaku adil", "B. Berlomba dalam kebaikan", "C. Sabar saat musibah", "D. Bersikap jujur", "E. Kerja keras"], answer: 1 },
+      { q: "Q.S. At-Taubah: 105 berisi anjuran tentang...", options: ["A. Etos kerja", "B. Harta warisan", "C. Hukum jual beli", "D. Rukun nikah", "E. Rukun iman"], answer: 0 },
+      { q: "Al-Qur'an diturunkan sebagai 'Muhaimin'. Artinya...", options: ["A. Kitab pengganti", "B. Penghapus dosa", "C. Penjaga/Pembenar", "D. Cerita masa lalu", "E. Obat penyakit"], answer: 2 },
+      { q: "\"...fasayarallahu 'amalakum\" artinya Allah akan melihat...", options: ["A. Niat lurusmu", "B. Harta bendamu", "C. Pekerjaan/Amalmu", "D. Paras wajahmu", "E. Kesalahanmu"], answer: 2 },
+      { q: "Sikap yang mencerminkan Q.S. Al-Maidah 48 adalah...", options: ["A. Suka menunda", "B. Segera berbuat baik", "C. Banyak berdebat", "D. Pasrah keadaan", "E. Mudah menyerah"], answer: 1 },
+      { q: "Terhadap kitab suci sebelum Al-Qur'an kita wajib...", options: ["A. Mengamalkan", "B. Menghafalkan", "C. Mengimani", "D. Mengingkari", "E. Melupakan"], answer: 2 },
+      { q: "Siapa yang akan melihat amal kita (At-Taubah 105)?", options: ["A. Allah, Rasul, Mukminin", "B. Malaikat pencatat", "C. Orang tua", "D. Atasan kerja", "E. Teman sejawat"], answer: 0 },
+      { q: "Hukum berkompetisi dalam kebaikan adalah...", options: ["A. Makruh", "B. Mubah", "C. Haram", "D. Syubhat", "E. Sangat Dianjurkan"], answer: 4 },
+      { q: "Manusia di akhirat dikembalikan kepada Allah Yang Mengetahui...", options: ["A. Benar dan salah", "B. Gaib dan nyata", "C. Hidup dan mati", "D. Langit dan bumi", "E. Amal dan dosa"], answer: 1 }
+    ]
+  },
+  2: {
+    title: "Intermediate",
+    description: "Taktik Menengah: Memahami konsep Fastabiqul Khairat dan Etos Kerja secara lebih mendalam.",
+    pointPerQuestion: 3,
+    questions: [
+      { q: "Mengapa Allah menciptakan syariat yang berbeda?", options: ["A. Agar berselisih", "B. Ujian berlomba dlm kebaikan", "C. Hukuman manusia", "D. Memisah bangsa", "E. Memicu perang"], answer: 1 },
+      { q: "Karakteristik muslim dengan etos kerja tinggi adalah...", options: ["A. Halalkan cara", "B. Disiplin & tawakal", "C. Kerja lupa waktu", "D. Bergantung orang", "E. Banyak berhutang"], answer: 1 },
+      { q: "Jika teman mencontek, sikap fastabiqul khairat adalah...", options: ["A. Nasihati untuk jujur", "B. Beri jawaban", "C. Pura-pura diam", "D. Ikut mencontek", "E. Langsung mengejek"], answer: 0 },
+      { q: "Kaitan iman dan amal saleh (kerja) dalam Islam...", options: ["A. Keduanya terpisah", "B. Iman diwujudkan dgn amal", "C. Amal lebih utama", "D. Iman saja cukup", "E. Bertentangan"], answer: 1 },
+      { q: "Dilarang menunda pekerjaan (prokrastinasi) karena...", options: ["A. Takut dipecat", "B. Potong gaji", "C. Waktu adalah amanah", "D. Ambisi cepat kaya", "E. Tuntutan gaya hidup"], answer: 2 },
+      { q: "Ujian dalam keberagaman manusia bertujuan untuk...", options: ["A. Cari ras terkuat", "B. Tahu siapa yang taat", "C. Menambah beban", "D. Kurangi pahala", "E. Membuat bingung"], answer: 1 },
+      { q: "\"Kerja ikhlas\" dalam etos Islami berarti...", options: ["A. Mencari pujian", "B. Demi naik jabatan", "C. Niat ridha Allah", "D. Cepat kaya", "E. Jadi populer"], answer: 2 },
+      { q: "Balasan amal saleh yang ikhlas di akhirat adalah...", options: ["A. Harta warisan", "B. Pahala berlipat", "C. Pangkat tinggi", "D. Tambahan umur", "E. Ketenaran abadi"], answer: 1 },
+      { q: "Contoh nyata etos kerja bagi seorang pelajar...", options: ["A. Sering bolos", "B. Rajin & tekun belajar", "C. Terus bermain", "D. Tidur di sekolah", "E. Tunda kerjakan PR"], answer: 1 },
+      { q: "Sabda Nabi SAW: Amal yang paling dicintai Allah adalah...", options: ["A. Cepat selesai", "B. Rutin walau sedikit", "C. Sekaligus besar", "D. Disertai riya", "E. Dilihat banyak orang"], answer: 1 }
+    ]
+  },
+  3: {
+    title: "Advance",
+    description: "Strategi Master: Menganalisa penerapan ayat dan hadis dalam konteks kehidupan modern.",
+    pointPerQuestion: 4,
+    questions: [
+      { q: "Fastabiqul Khairat di dunia kerja modern berarti...", options: ["A. Menjatuhkan saingan", "B. Monopoli proyek", "C. Kompetisi sehat & profesional", "D. Pasif cari aman", "E. Menyogok atasan"], answer: 2 },
+      { q: "Pesan \"...dikembalikan kepada Yang Mengetahui yang gaib\"...", options: ["A. Balasan instan", "B. Audit amal mutlak", "C. Dosa disembunyikan", "D. Amal tak dicatat", "E. Tak ada hisab"], answer: 1 },
+      { q: "Menyeimbangkan ibadah dan tuntutan lembur kerja...", options: ["A. Tinggalkan shalat", "B. Kerja ibadah, shalat prioritas", "C. Qadha shalat rumah", "D. Berhenti kerja", "E. Shalat di waktu luang"], answer: 1 },
+      { q: "Beda fundamental etos kerja Islami dan sekuler...", options: ["A. Kedisiplinan", "B. Target laba", "C. Niat lillahi ta'ala", "D. Jumlah jam kerja", "E. Produk yang dibuat"], answer: 2 },
+      { q: "\"Bekerja seakan hidup selamanya, ibadah seakan mati besok\"...", options: ["A. Lupa urusan akhirat", "B. Takut kematian", "C. Keseimbangan dunia akhirat", "D. Kejar harta tanpa batas", "E. Tinggalkan duniawi"], answer: 2 },
+      { q: "Hikmah Allah tidak menjadikan manusia satu umat...", options: ["A. Manusia itu lemah", "B. Pacu daya saing positif", "C. Agar saling menjajah", "D. Percepat kiamat", "E. Kurangi populasi bumi"], answer: 1 },
+      { q: "Kriteria utama profesi dinilai amal saleh...", options: ["A. Gajinya besar", "B. Jabatan tinggi", "C. Halal dan bermanfaat", "D. Dikenal publik", "E. Lokasi kerjanya dekat"], answer: 2 },
+      { q: "Bukti Islam tak pisahkan agama dan urusan dunia...", options: ["A. Sistem pajak", "B. Kewajiban zakat", "C. Bekerja dinilai ibadah", "D. Masjid yang megah", "E. Kewajiban haji"], answer: 2 },
+      { q: "Muslim beretos kerja tinggi di era digital akan...", options: ["A. Menolak teknologi", "B. Adaptif dan inovatif", "C. Konsumtif medsos", "D. Pasrah pada mesin", "E. Sebar berita hoax"], answer: 1 },
+      { q: "Korelasi Q.S Al-Maidah 48 & At-Taubah 105 untuk peradaban...", options: ["A. Etos kebaikan & kerja keras", "B. Strategi militer", "C. Kumpulkan kekayaan", "D. Sikap pasrah", "E. Uzlah menjauhi dunia"], answer: 0 }
+    ]
+  }
+};
+
+// --- STYLING COMPONENTS ---
+const WoodButton = ({ children, onClick, disabled, className = "", variant = "primary", type = "button" }) => {
+  const baseStyle = "relative px-6 py-3 font-bold text-white uppercase tracking-wider transition-all transform active:scale-95 disabled:opacity-50 disabled:active:scale-100 rounded shadow-lg";
+  const colors = {
+    primary: "bg-amber-600 border-b-4 border-amber-800 hover:bg-amber-500",
+    success: "bg-emerald-600 border-b-4 border-emerald-800 hover:bg-emerald-500",
+    danger: "bg-red-600 border-b-4 border-red-800 hover:bg-red-500",
+  };
+  return (
+    <button 
+      type={type}
+      onClick={onClick} 
+      disabled={disabled}
+      className={`${baseStyle} ${colors[variant]} ${className} border-x-2 border-t-2 border-opacity-30`}
+      style={{ textShadow: "1px 1px 2px rgba(0,0,0,0.8)" }}
+    >
+      {children}
+    </button>
+  );
+};
+
+const WoodPanel = ({ children, className = "" }) => (
+  <div className={`bg-amber-900 p-2 rounded-xl shadow-2xl border-4 border-amber-950 ${className}`}>
+    <div className="bg-amber-100 border-4 border-amber-800 rounded-lg p-6 h-full flex flex-col">
+      {children}
+    </div>
+  </div>
+);
+
+const GameFooter = () => (
+  <div className="absolute bottom-2 w-full text-center text-xs md:text-sm font-bold text-white/70 pointer-events-none z-50 tracking-wider" style={{ textShadow: "1px 1px 2px rgba(0,0,0,0.9)" }}>
+    Game ini dibuat oleh: Cak_Moech, GPAI SMAN Kalisat
+  </div>
+);
+
+export default function App() {
+  const [gameState, setGameState] = useState('login'); // login, village, battle, result
+  const [userData, setUserData] = useState({ name: '', classId: 'X1', absent: '' });
+  const [currentLevel, setCurrentLevel] = useState(null);
+  
+  // Game Progress State
+  const [scores, setScores] = useState({ 1: 0, 2: 0, 3: 0 });
+  const [completedLevels, setCompletedLevels] = useState({ 1: false, 2: false, 3: false });
+  
+  // Battle State
+  const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [isAnswered, setIsAnswered] = useState(false);
+  const [battleScore, setBattleScore] = useState(0);
+
+  // Anti-cheat state
+  const [showCheatWarning, setShowCheatWarning] = useState(false);
+
+  // BGM Audio State
+  const [isAudioMuted, setIsAudioMuted] = useState(false);
+  const [audio] = useState(new Audio('https://cdn.pixabay.com/download/audio/2022/01/18/audio_82136cd3a2.mp3')); // Tema peperangan epic
+
+  useEffect(() => {
+    audio.loop = true;
+    audio.volume = 0.4;
+    return () => audio.pause();
+  }, [audio]);
+
+  // Anti-Cheat (Focus Mode) Listener
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      // Jika tab tidak aktif / window blur saat mode battle (kuis berjalan)
+      if (document.hidden && gameState === 'battle') {
+        setShowCheatWarning(true);
+      }
+    };
+    
+    // Dengarkan saat user ganti tab atau ganti aplikasi
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handleVisibilityChange);
+    };
+  }, [gameState]);
+
+  const toggleAudio = () => {
+    setIsAudioMuted(!isAudioMuted);
+    audio.muted = !isAudioMuted;
+  };
+
+  const totalGold = scores[1] + scores[2] + scores[3];
+  const isGameComplete = completedLevels[1] && completedLevels[2] && completedLevels[3];
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (userData.name && userData.absent) {
+      audio.play().catch(() => console.log("Audio autoplay dicegah browser"));
+      setGameState('village');
+    }
+  };
+
+  const startLevel = (levelId) => {
+    if (levelId === 2 && !completedLevels[1]) return;
+    if (levelId === 3 && !completedLevels[2]) return;
+    
+    setCurrentLevel(levelId);
+    setCurrentQuestionIdx(0);
+    setBattleScore(0);
+    setSelectedOption(null);
+    setIsAnswered(false);
+    setGameState('battle');
+  };
+
+  const handleAnswer = (optionIdx) => {
+    if (isAnswered) return;
+    
+    setSelectedOption(optionIdx);
+    setIsAnswered(true);
+    
+    const isCorrect = optionIdx === quizData[currentLevel].questions[currentQuestionIdx].answer;
+    if (isCorrect) {
+      setBattleScore(prev => prev + quizData[currentLevel].pointPerQuestion);
+    }
+  };
+
+  const nextQuestion = () => {
+    if (currentQuestionIdx < quizData[currentLevel].questions.length - 1) {
+      setCurrentQuestionIdx(prev => prev + 1);
+      setSelectedOption(null);
+      setIsAnswered(false);
+    } else {
+      // Finish Level
+      setScores(prev => ({ ...prev, [currentLevel]: battleScore }));
+      setCompletedLevels(prev => ({ ...prev, [currentLevel]: true }));
+      setGameState('village');
+    }
+  };
+
+  // --- SCREENS ---
+  
+  if (gameState === 'login') {
+    return (
+      <div className="min-h-screen bg-green-800 flex items-center justify-center p-4 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-green-700 via-green-800 to-green-950 font-sans">
+        <WoodPanel className="w-full max-w-md">
+          <div className="text-center mb-6">
+            <img src="https://imgur.com/sDg40yG.png" alt="Logo Kebaikan" className="w-40 mx-auto mb-2 drop-shadow-xl" />
+            <h1 className="text-3xl font-black text-amber-900 uppercase tracking-tighter" style={{ textShadow: "1px 1px 0px rgba(255,255,255,0.5)" }}>
+              Clash of <br/>Kebaikan
+            </h1>
+            <p className="text-amber-800 font-bold mt-2">Misi: Fastabiqul Khairat & Etos Kerja</p>
+            <p className="text-amber-700 text-sm italic">Pendidikan Agama Islam Kelas X</p>
+          </div>
+          
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-amber-900 font-bold mb-1">Nama Kesatria (Siswa)</label>
+              <input 
+                required
+                type="text" 
+                className="w-full p-3 border-2 border-amber-700 rounded bg-white focus:outline-none focus:ring-4 focus:ring-amber-500/50"
+                placeholder="Masukkan namamu..."
+                value={userData.name}
+                onChange={e => setUserData({...userData, name: e.target.value})}
+              />
+            </div>
+            
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="block text-amber-900 font-bold mb-1">Kelas</label>
+                <select 
+                  className="w-full p-3 border-2 border-amber-700 rounded bg-white focus:outline-none focus:ring-4 focus:ring-amber-500/50"
+                  value={userData.classId}
+                  onChange={e => setUserData({...userData, classId: e.target.value})}
+                >
+                  {[...Array(10)].map((_, i) => (
+                    <option key={`X${i+1}`} value={`X${i+1}`}>X - {i+1}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="w-24">
+                <label className="block text-amber-900 font-bold mb-1">No Absen</label>
+                <input 
+                  required
+                  type="number" 
+                  min="1" 
+                  max="36"
+                  className="w-full p-3 border-2 border-amber-700 rounded bg-white focus:outline-none focus:ring-4 focus:ring-amber-500/50"
+                  value={userData.absent}
+                  onChange={e => setUserData({...userData, absent: e.target.value})}
+                />
+              </div>
+            </div>
+            
+            <div className="pt-4">
+              <WoodButton type="submit" className="w-full flex items-center justify-center gap-2 text-lg">
+                <Swords className="w-5 h-5" />
+                Mulai Ekspedisi
+              </WoodButton>
+            </div>
+          </form>
+        </WoodPanel>
+        
+        <GameFooter />
+      </div>
+    );
+  }
+
+  if (gameState === 'village') {
+    return (
+      <div className="min-h-screen bg-green-700 flex flex-col items-center bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] relative overflow-hidden font-sans">
+        
+        {/* Top Header / HUD */}
+        <div className="w-full bg-slate-900 text-white p-3 shadow-lg flex justify-between items-center z-10 border-b-4 border-slate-950">
+          <div className="flex items-center gap-3">
+            <button onClick={toggleAudio} className="bg-slate-800 p-2 rounded-full border-2 border-slate-600 hover:bg-slate-700 transition-colors">
+              {isAudioMuted ? <VolumeX className="w-5 h-5 text-red-400" /> : <Volume2 className="w-5 h-5 text-green-400" />}
+            </button>
+            <div className="bg-slate-800 p-2 rounded-full border-2 border-slate-600">
+              <User className="w-5 h-5 text-blue-400" />
+            </div>
+            <div>
+              <p className="font-bold text-sm leading-tight">{userData.name}</p>
+              <p className="text-xs text-slate-400">Kelas: {userData.classId} | Absen: {userData.absent}</p>
+            </div>
+          </div>
+          
+          <div className="flex bg-amber-950 rounded-full pr-4 pl-1 py-1 border-2 border-amber-700 items-center gap-2 shadow-inner">
+            <div className="bg-amber-500 rounded-full p-1">
+              <Coins className="w-5 h-5 text-amber-900" />
+            </div>
+            <span className="font-black text-amber-400">{totalGold} Pahala</span>
+          </div>
+        </div>
+
+        {/* Map Area */}
+        <div className="flex-1 w-full max-w-4xl p-6 flex flex-col items-center justify-center gap-12 relative z-0">
+          
+          {/* Level 3: Advance */}
+          <div className={`relative flex flex-col items-center transition-all ${!completedLevels[2] ? 'opacity-50 grayscale' : 'hover:scale-105'}`}>
+            <button 
+              disabled={!completedLevels[2]}
+              onClick={() => startLevel(3)}
+              className="relative z-10"
+            >
+              <div className="bg-slate-800 border-4 border-slate-950 rounded-xl p-4 shadow-[0_10px_0_rgb(2,6,23)] flex flex-col items-center gap-2 w-48">
+                <Castle className="w-16 h-16 text-purple-400" />
+                <div className="text-center">
+                  <h3 className="font-black text-slate-100 text-sm">Benteng Advance</h3>
+                  <p className="text-xs text-purple-300 font-bold">Level 3</p>
+                </div>
+                {completedLevels[3] && <div className="absolute -top-4 -right-4 bg-green-500 text-white rounded-full p-2 border-2 border-white shadow-lg"><Check /></div>}
+                {completedLevels[3] && <p className="text-xs bg-slate-950 text-white px-2 py-1 rounded w-full text-center">Skor: {scores[3]}</p>}
+              </div>
+            </button>
+            <div className="w-2 h-16 bg-amber-900 border-x-4 border-amber-950 absolute -bottom-16 -z-10"></div>
+          </div>
+
+          {/* Level 2: Intermediate */}
+          <div className={`relative flex flex-col items-center transition-all ${!completedLevels[1] ? 'opacity-50 grayscale' : 'hover:scale-105'}`}>
+            <button 
+              disabled={!completedLevels[1]}
+              onClick={() => startLevel(2)}
+              className="relative z-10"
+            >
+              <div className="bg-amber-800 border-4 border-amber-950 rounded-xl p-4 shadow-[0_10px_0_rgb(69,26,3)] flex flex-col items-center gap-2 w-48">
+                <Shield className="w-16 h-16 text-blue-300" />
+                <div className="text-center">
+                  <h3 className="font-black text-slate-100 text-sm">Menara Intermediate</h3>
+                  <p className="text-xs text-blue-200 font-bold">Level 2</p>
+                </div>
+                {completedLevels[2] && <div className="absolute -top-4 -right-4 bg-green-500 text-white rounded-full p-2 border-2 border-white shadow-lg"><Check /></div>}
+                {completedLevels[2] && <p className="text-xs bg-amber-950 text-white px-2 py-1 rounded w-full text-center">Skor: {scores[2]}</p>}
+              </div>
+            </button>
+            <div className="w-2 h-16 bg-amber-900 border-x-4 border-amber-950 absolute -bottom-16 -z-10"></div>
+          </div>
+
+          {/* Level 1: Beginner */}
+          <div className="relative flex flex-col items-center transition-all hover:scale-105">
+            <button 
+              onClick={() => startLevel(1)}
+              className="relative z-10"
+            >
+              <div className="bg-orange-600 border-4 border-orange-900 rounded-xl p-4 shadow-[0_10px_0_rgb(124,45,18)] flex flex-col items-center gap-2 w-48">
+                <Swords className="w-16 h-16 text-yellow-300" />
+                <div className="text-center">
+                  <h3 className="font-black text-slate-100 text-sm">Kamp Beginner</h3>
+                  <p className="text-xs text-yellow-200 font-bold">Level 1</p>
+                </div>
+                {completedLevels[1] && <div className="absolute -top-4 -right-4 bg-green-500 text-white rounded-full p-2 border-2 border-white shadow-lg"><Check /></div>}
+                {completedLevels[1] && <p className="text-xs bg-orange-950 text-white px-2 py-1 rounded w-full text-center">Skor: {scores[1]}</p>}
+              </div>
+            </button>
+          </div>
+
+        </div>
+
+        {/* Footer Actions */}
+        <div className="w-full p-4 flex justify-between z-10 pb-8">
+          <button 
+            onClick={() => {
+              if(confirm("Yakin ingin keluar dan mengulang?")) {
+                audio.pause();
+                audio.currentTime = 0;
+                setGameState('login');
+                setScores({1:0, 2:0, 3:0});
+                setCompletedLevels({1:false, 2:false, 3:false});
+              }
+            }}
+            className="flex items-center gap-2 bg-red-800 text-white px-4 py-2 rounded-full font-bold border-2 border-red-950 hover:bg-red-700"
+          >
+            <LogOut className="w-4 h-4" /> Keluar
+          </button>
+
+          {isGameComplete && (
+            <WoodButton variant="success" onClick={() => setGameState('result')} className="animate-bounce flex items-center gap-2">
+              <Trophy className="w-5 h-5" /> Lihat Hasil Akhir
+            </WoodButton>
+          )}
+        </div>
+        
+        <GameFooter />
+      </div>
+    );
+  }
+
+  if (gameState === 'battle') {
+    const currentQuiz = quizData[currentLevel];
+    const question = currentQuiz.questions[currentQuestionIdx];
+    const totalQuestions = currentQuiz.questions.length;
+
+    return (
+      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-800 to-slate-950 font-sans relative">
+        
+        {/* Battle Header */}
+        <div className="absolute top-0 left-0 w-full p-4 flex justify-between items-center text-white">
+          <div className="bg-slate-800 px-4 py-2 rounded-full border-2 border-slate-600 font-bold flex gap-2 items-center">
+            <ScrollText className="w-5 h-5 text-amber-500" />
+            Level {currentLevel}: {currentQuiz.title}
+          </div>
+          <div className="bg-slate-800 px-4 py-2 rounded-full border-2 border-slate-600 font-bold flex gap-2 items-center">
+            <Coins className="w-5 h-5 text-amber-500" />
+            Loot: {battleScore}
+          </div>
+        </div>
+
+        <WoodPanel className="w-full max-w-2xl mt-16">
+          <div className="mb-4 flex justify-between items-end border-b-2 border-amber-200 pb-2">
+            <span className="font-bold text-amber-900">Pasukan Pertanyaan {currentQuestionIdx + 1}/{totalQuestions}</span>
+            <span className="text-sm font-bold text-amber-700 bg-amber-200 px-2 py-1 rounded-full">{currentQuiz.pointPerQuestion} Poin/Soal</span>
+          </div>
+
+          <h2 className="text-xl font-black text-amber-950 mb-6 min-h-[4rem]">
+            {question.q}
+          </h2>
+
+          <div className="space-y-3 flex-1">
+            {question.options.map((opt, idx) => {
+              let btnClass = "w-full text-left p-4 rounded border-2 font-semibold transition-all ";
+              
+              if (!isAnswered) {
+                btnClass += "bg-white border-amber-300 hover:bg-amber-50 hover:border-amber-500 text-slate-800 cursor-pointer shadow-sm";
+              } else {
+                if (idx === question.answer) {
+                  btnClass += "bg-emerald-100 border-emerald-500 text-emerald-900 shadow-[0_0_15px_rgba(16,185,129,0.5)]"; // Correct
+                } else if (idx === selectedOption) {
+                  btnClass += "bg-red-100 border-red-500 text-red-900 opacity-80"; // Wrong selected
+                } else {
+                  btnClass += "bg-white border-slate-200 text-slate-400 opacity-50 cursor-not-allowed"; // Unselected
+                }
+              }
+
+              return (
+                <button
+                  key={idx}
+                  disabled={isAnswered}
+                  onClick={() => handleAnswer(idx)}
+                  className={btnClass}
+                >
+                  <div className="flex items-start justify-between">
+                    <span>{opt}</span>
+                    {isAnswered && idx === question.answer && <Check className="text-emerald-600 flex-shrink-0" />}
+                    {isAnswered && idx === selectedOption && idx !== question.answer && <X className="text-red-600 flex-shrink-0" />}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="mt-8 flex justify-end h-14">
+            {isAnswered && (
+              <WoodButton variant="primary" onClick={nextQuestion} className="flex items-center gap-2">
+                {currentQuestionIdx < totalQuestions - 1 ? 'Pertanyaan Selanjutnya' : 'Selesaikan Pertempuran'}
+                <Play className="w-4 h-4 fill-current" />
+              </WoodButton>
+            )}
+          </div>
+        </WoodPanel>
+        
+        <GameFooter />
+
+        {/* Anti-Cheat Modal Warning */}
+        {showCheatWarning && (
+          <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
+            <div className="bg-red-900 p-2 rounded-xl shadow-2xl border-4 border-red-950 w-full max-w-md animate-pulse">
+              <div className="bg-red-100 border-4 border-red-800 rounded-lg p-6 flex flex-col items-center text-center">
+                <AlertTriangle className="w-16 h-16 text-red-600 mb-4" />
+                <h2 className="text-2xl font-black text-red-900 mb-2 uppercase">Pelanggaran Fokus!</h2>
+                <p className="text-red-800 font-bold mb-6 text-sm">
+                  Sistem mendeteksi Anda meninggalkan aplikasi atau membuka tab lain. Harap junjung tinggi nilai kejujuran dalam mengerjakan kuis!
+                </p>
+                <WoodButton 
+                  variant="danger" 
+                  onClick={() => setShowCheatWarning(false)}
+                  className="w-full"
+                >
+                  Saya Paham & Akan Jujur
+                </WoodButton>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (gameState === 'result') {
+    const maxGold = 
+      (quizData[1].questions.length * quizData[1].pointPerQuestion) +
+      (quizData[2].questions.length * quizData[2].pointPerQuestion) +
+      (quizData[3].questions.length * quizData[3].pointPerQuestion);
+    
+    const percentage = (totalGold / maxGold) * 100;
+    
+    let rank = "Pasukan Baru";
+    if (percentage >= 90) rank = "Panglima Kebaikan (Legend)";
+    else if (percentage >= 75) rank = "Kesatria Amal (Master)";
+    else if (percentage >= 50) rank = "Pejuang Fastabiq (Crystal)";
+
+    return (
+      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] relative font-sans">
+        
+        <div className="text-center mb-8 animate-bounce">
+          <Trophy className="w-24 h-24 text-yellow-400 mx-auto drop-shadow-[0_0_15px_rgba(250,204,21,0.8)]" />
+        </div>
+
+        <WoodPanel className="w-full max-w-lg relative">
+          
+          <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-amber-600 text-white font-black px-6 py-2 rounded-full border-4 border-amber-900 shadow-lg whitespace-nowrap">
+            REKAPITULASI KEMENANGAN
+          </div>
+
+          <div className="text-center mt-6 mb-6">
+            <h2 className="text-2xl font-black text-amber-950 uppercase">{userData.name}</h2>
+            <p className="text-amber-800 font-bold">Kelas: {userData.classId} | Absen: {userData.absent}</p>
+          </div>
+
+          <div className="space-y-3 bg-amber-50 rounded p-4 border-2 border-amber-200">
+            <div className="flex justify-between items-center border-b-2 border-amber-200 pb-2">
+              <span className="font-bold text-slate-700 flex items-center gap-2"><Swords className="w-4 h-4 text-orange-600"/> Lvl 1: Beginner</span>
+              <span className="font-black text-amber-700">{scores[1]}</span>
+            </div>
+            <div className="flex justify-between items-center border-b-2 border-amber-200 pb-2">
+              <span className="font-bold text-slate-700 flex items-center gap-2"><Shield className="w-4 h-4 text-blue-600"/> Lvl 2: Intermediate</span>
+              <span className="font-black text-amber-700">{scores[2]}</span>
+            </div>
+            <div className="flex justify-between items-center border-b-2 border-amber-200 pb-2">
+              <span className="font-bold text-slate-700 flex items-center gap-2"><Castle className="w-4 h-4 text-purple-600"/> Lvl 3: Advance</span>
+              <span className="font-black text-amber-700">{scores[3]}</span>
+            </div>
+            <div className="flex justify-between items-center pt-2 bg-amber-200 px-3 py-2 rounded">
+              <span className="font-black text-amber-900 text-lg">TOTAL PAHALA</span>
+              <div className="flex items-center gap-1">
+                <Coins className="w-5 h-5 text-amber-600" />
+                <span className="font-black text-amber-900 text-2xl">{totalGold} <span className="text-sm font-bold text-amber-700">/ {maxGold}</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 text-center">
+            <p className="text-amber-800 font-bold mb-1">Gelar Kehormatan:</p>
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-500 px-6 py-3 rounded-full shadow-lg border-2 border-yellow-200">
+              <Star className="w-6 h-6 text-white fill-current" />
+              <span className="font-black text-white text-xl uppercase tracking-wider" style={{ textShadow: "1px 1px 2px rgba(0,0,0,0.5)" }}>{rank}</span>
+              <Star className="w-6 h-6 text-white fill-current" />
+            </div>
+          </div>
+
+          {/* Screenshot Instruction Box */}
+          <div className="mt-6 bg-blue-100 border-l-4 border-blue-600 p-4 rounded text-left flex gap-4 shadow-inner items-center">
+            <div className="bg-blue-600 p-2 rounded-full text-white animate-bounce">
+              <Camera className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="font-black text-blue-900 text-sm">TUGAS SELESAI!</p>
+              <p className="text-xs text-blue-800 font-semibold mt-1">
+                Silakan <span className="font-black underline">SCREENSHOT</span> (Tangkapan Layar) halaman ini dan kumpulkan kepada Guru Pengajar sebagai bukti penyelesaian misi.
+              </p>
+            </div>
+          </div>
+
+        </WoodPanel>
+        
+        <div className="mt-8">
+          <button 
+            onClick={() => {
+              audio.pause();
+              window.location.reload();
+            }}
+            className="text-white hover:text-amber-400 font-bold underline underline-offset-4"
+          >
+            Selesaikan dan Mulai Petualangan Baru
+          </button>
+        </div>
+        
+        <GameFooter />
+      </div>
+    );
+  }
+
+  return null;
+}
